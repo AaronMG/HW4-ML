@@ -14,15 +14,17 @@ function prob1
     x_test = data(2001:end,:);
     y_test = labels(2001:end,:);
     
-    n = [200 500 800 1000 1500 2000];
+    n = [200 500 800 1000 1500 2000];           %Different training set sizes
     accuracy = [];
-    for i=1:length(n)
+    perf = [];
+    for i=1:length(n)                           %Train and test for each n size
         correct = 0;
         n_xtrain = x_train(1:n(i),:);
         n_ytrain = y_train(1:n(i),:);
-        weights = logistic_train(n_xtrain, n_ytrain, epsilon, maxiter);
-        prediction = sigmf(x_test*weights, [1 0]);
-        pred = round(prediction);
+        weights = logistic_train(n_xtrain, n_ytrain, epsilon, maxiter); %Use the logistic_train function to calculate the weights
+        prediction = sigmf(x_test*weights, [1 0]);                      %Calculate our prediction and take the sigmoid of them
+        [~,~,~,perf(i)] = perfcurve(y_test, prediction, 1);             %AUU information for later plot
+        pred = round(prediction);                                       %Round our predictions for accuracy calculation
         for j = 1:length(y_test)
            if y_test(j) == pred(j)
                correct = correct + 1;
@@ -31,8 +33,12 @@ function prob1
         accuracy(i) = correct/length(y_test);
         fprintf('n = %d\tAccuracy = %f\n', n(i), accuracy(i));
     end
+    figure;
     plot(n, accuracy);
-    
+    title('Accuracy Curve');
+    figure;
+    plot(n, perf);
+    title('ACU Curve');
 end
 
 function [weights] = logistic_train(data, labels, epsilon, maxiter)
